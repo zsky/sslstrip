@@ -72,19 +72,10 @@ class ProxyServer {
     }
 
     /**
-     * 处理 Url
-     * 去掉 query 参数
-     */
-    handleUrl(link) {
-        let parseObj = url.parse(link);
-        return parseObj.hostname + parseObj.pathname;
-    }
-
-    /**
      * 判断是否本来应该是 https 的请求
      */
     shouldBeHttps(request) {
-        let requestUrl = this.handleUrl(request.url);
+        let requestUrl = request.headers.host + url.parse(request.url).pathname;
         return this._urlMap[requestUrl];
     }
 
@@ -92,7 +83,9 @@ class ProxyServer {
      * 记录本应是 https 请求的 url
      */
     updateUrlMap(httpsLink) {
-        let handledUrl = this.handleUrl(httpsLink);
+        // 处理 Url ，只保留 hostname 和 pathname
+        let parseObj = url.parse(httpsLink);
+        let handledUrl = parseObj.hostname + parseObj.pathname;
         console.log('Add Url:', handledUrl);
         this._urlMap[handledUrl] = true;
     }
@@ -190,4 +183,4 @@ class ProxyServer {
 }
 
 let proxy = new ProxyServer();
-proxy.start(8081);
+proxy.start(8080);
